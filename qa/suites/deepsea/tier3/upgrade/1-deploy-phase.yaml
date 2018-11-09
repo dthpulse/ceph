@@ -17,3 +17,7 @@ tasks:
                 stage: 3
         - deepsea.state:
                 state: ceph.updates.salt
+        - deepsea.state:
+                target: -I cluster:ceph
+                state: ceph.updates.salt
+                
