@@ -15,3 +15,5 @@ tasks:
         - deepsea.ceph_conf:
         - deepsea.orch:
                 stage: 3
+        - deepsea.state:
+                state: ceph.updates.salt
