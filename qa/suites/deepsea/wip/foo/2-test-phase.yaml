@@ -3,3 +3,7 @@ tasks:
                 client.salt_master:
                         - 'ceph -s'
         - deepsea.validation:
+        - workunit:
+                clients:
+                        client.salt_master:
+                                - deepsea/wip/foo.sh
