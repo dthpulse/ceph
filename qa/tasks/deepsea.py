@@ -1583,18 +1583,21 @@ function create_all_pools_at_once {
 MDS=""
 OPENSTACK=""
 RBD=""
+OTHER=""
 for arg in "$@" ; do
     arg="${arg,,}"
     case "$arg" in
         mds) MDS="$arg" ;;
         openstack) OPENSTACK="$arg" ;;
         rbd) RBD="$arg" ;;
+        *) OTHER+=" $arg" ;;
     esac
 done
 #
-POOLS="write_test"
-test "$MDS" && POOLS+=" cephfs_data cephfs_metadata"
-if [ "$OPENSTACK" ] ; then
+POOLS=""
+if [ $MDS ] ; then
+    ADD_POOLS="cephfs_data cephfs_metadata"
+elif [ "$OPENSTACK" ] ; then
     ADD_POOLS="smoketest-cloud-backups
 smoketest-cloud-volumes
 smoketest-cloud-images
@@ -1604,13 +1607,24 @@ cloud-volumes
 cloud-images
 cloud-vms
 "
-    for add_pool in $ADD_POOLS ; do
-        POOLS+=" $add_pool"
-    done
+elif [ "$RBD" ] ; then
+    ADD_POOLS="rbd"
+elif [ "$OTHER" ] ; then
+    ADD_POOLS="$OTHER"
+    APPLICATION_ENABLE="$OTHER"
 fi
-test "$RBD" && POOLS+=" rbd"
+if [ -z "$POOLS" ] ; then
+    echo "create_all_pools_at_once: bad arguments"
+    exit 1
+fi
+for add_pool in $ADD_POOLS ; do
+    POOLS+=" $add_pool"
+done
+echo "About to create pools ->$POOLS<-"
 create_all_pools_at_once $POOLS
-ceph osd pool application enable write_test deepsea_qa
+for pool in "$APPLICATION_ENABLE" ; do
+    ceph osd pool application enable $pool deepsea_qa
+done
 """,
         "disable_update_in_stage_0": """# Disable update in Stage 0
 set -ex
