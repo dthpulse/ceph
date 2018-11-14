@@ -843,14 +843,7 @@ class CreatePools(DeepSea):
         self.name = 'deepsea.create_pools'
         super(CreatePools, self).__init__(ctx, config)
         if not isinstance(self.config, dict):
-            raise ConfigError(
-                "(create_pools subtask) config must be a dictionary"
-                )
-        self.config = {
-            "mds": self.config.get("mds", False),
-            "openstack": self.config.get("openstack", False),
-            "rbd": self.config.get("rbd", False),
-            }
+            raise ConfigError("(create_pools subtask) config must be a dictionary")
 
     def begin(self):
         self.log.info(anchored("pre-creating pools"))
