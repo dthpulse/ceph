@@ -1,0 +1,9 @@
+tasks:
+        - exec:
+                client.salt_master:
+                        - 'ceph -s'
+                        - 'chmod a+r /etc/ceph/ceph.client.admin.keyring'
+        - workunit:
+                clients:
+                        client.salt_master:
+                                - deepsea/build_validation/rack_dc_region_unavailability.sh
