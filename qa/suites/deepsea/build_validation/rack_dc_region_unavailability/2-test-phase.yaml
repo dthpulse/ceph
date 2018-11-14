@@ -1,4 +1,6 @@
 tasks:
+        - deepsea.create_pools:
+                crushmap:
         - exec:
                 client.salt_master:
                         - 'ceph -s'
