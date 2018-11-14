@@ -18,32 +18,6 @@ do
 done
 }
 
-# calculating PG and PGP number
-num_of_osd=`ceph osd ls | wc -l`
-
-k=4
-m=2
-
-num_of_existing_pools=`ceph osd pool ls | wc -l`
-num_of_pools=1
-
-power2() { echo "x=l($1)/l(2); scale=0; 2^((x+0.5)/1)" | bc -l; }
-size=`ceph-conf -c /dev/null -D | grep "osd_pool_default_size" | cut -d = -f 2 | sed 's/\ //g'`
-osd_num=`ceph osd ls | wc -l`
-recommended_pg_per_osd=100
-pg_num=$(power2 `echo "(($osd_num*$recommended_pg_per_osd) / $size) / ($num_of_existing_pools + $num_of_pools)" | bc`)
-pgp_num=$pg_num
-
-
-pg_size_total=$(($pg_num*($k+$m)))
-until [ $pg_size_total -lt $((200*$num_of_osd)) ]
-do
- pg_num=$(($pg_num/2))
- pgp_num=$pg_num
- pg_size_total=$(($pg_num*($k+$m)))
-done
-
-
 crushmap_file=crushmap
 echo "Getting crushmap"
 ceph osd getcrushmap -o ${crushmap_file}.bin
@@ -144,11 +118,6 @@ do
  ceph osd crush move $osd_node rack=rack4
 done
  
-# creates pool
-echo "Creating pool crushmap"
-ceph osd pool create crushmap $pg_num $pgp_num
-while [ $(ceph -s | grep creating -c) -gt 0 ]; do echo -n .;sleep 1; done
-
 # get the master hostname
 #master=`salt-run select.minions roles=master | awk '{print $2}'`
 master=$(hostname)
@@ -286,10 +255,6 @@ do
 done
 
 cluster_health
-
-# remove pool
-ceph osd pool rm crushmap crushmap --yes-i-really-really-mean-it
-while [ $(ceph -s | grep creating -c) -gt 0 ]; do echo -n .;sleep 1; done
 
 # set back default crushmap
 ceph osd setcrushmap -i ${crushmap_file}.bin
