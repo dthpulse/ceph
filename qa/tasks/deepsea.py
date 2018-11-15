@@ -1606,7 +1606,7 @@ elif [ "$OTHER" ] ; then
     ADD_POOLS="$OTHER"
     APPLICATION_ENABLE="$OTHER"
 fi
-if [ -z "$POOLS" ] ; then
+if [ -z "$ADD_POOLS" ] ; then
     echo "create_all_pools_at_once: bad arguments"
     exit 1
 fi
